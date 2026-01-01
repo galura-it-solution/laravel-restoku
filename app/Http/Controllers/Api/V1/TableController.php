@@ -70,7 +70,7 @@ class TableController extends Controller
                     ->where('updated_at', '>', $lastUpdated)
                     ->orderBy('updated_at')
                     ->limit(50)
-                    ->get();
+                    ->get(['id', 'status', 'updated_at']);
 
                 foreach ($tables as $table) {
                     $lastUpdated = $table->updated_at ?? $lastUpdated;

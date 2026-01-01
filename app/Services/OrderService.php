@@ -12,12 +12,15 @@ use App\Repositories\RestaurantTableRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class OrderService
 {
+    private const QUEUE_META_TTL_SECONDS = 5;
+
     public function __construct(
         private OrderRepository $orders,
         private OrderItemRepository $orderItems,
@@ -204,12 +207,47 @@ class OrderService
 
     public function withQueueMeta(Order $order): Order
     {
-        $order->setAttribute('queue_number', $this->orders->getQueueNumber($order));
+        if (in_array($order->status, Order::ACTIVE_STATUSES, true)) {
+            $order->setAttribute('queue_number', $this->rememberQueueNumber($order));
+        } else {
+            $order->setAttribute('queue_number', null);
+        }
+
         $order->setAttribute(
             'current_processing_queue_number',
-            $this->orders->getCurrentProcessingQueueNumber()
+            $this->rememberCurrentProcessingQueueNumber()
         );
 
         return $order;
+    }
+
+    private function rememberQueueNumber(Order $order): ?int
+    {
+        $cacheKey = 'orders:queue_number:' . $order->id;
+
+        if (Cache::supportsTags()) {
+            return Cache::tags(['orders'])->remember($cacheKey, self::QUEUE_META_TTL_SECONDS, function () use ($order) {
+                return $this->orders->getQueueNumber($order);
+            });
+        }
+
+        return Cache::remember($cacheKey, self::QUEUE_META_TTL_SECONDS, function () use ($order) {
+            return $this->orders->getQueueNumber($order);
+        });
+    }
+
+    private function rememberCurrentProcessingQueueNumber(): ?int
+    {
+        $cacheKey = 'orders:current_processing_queue_number';
+
+        if (Cache::supportsTags()) {
+            return Cache::tags(['orders'])->remember($cacheKey, self::QUEUE_META_TTL_SECONDS, function () {
+                return $this->orders->getCurrentProcessingQueueNumber();
+            });
+        }
+
+        return Cache::remember($cacheKey, self::QUEUE_META_TTL_SECONDS, function () {
+            return $this->orders->getCurrentProcessingQueueNumber();
+        });
     }
 }

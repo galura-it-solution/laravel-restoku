@@ -84,7 +84,7 @@ class EloquentOrderRepository implements OrderRepository
             $query->where('updated_at', '>', $filters['updated_after']);
         }
 
-        return $query->latest()->paginate($filters['per_page'] ?? 20);
+        return $query->orderByDesc('updated_at')->paginate($filters['per_page'] ?? 20);
     }
 
     public function create(array $data): Order
