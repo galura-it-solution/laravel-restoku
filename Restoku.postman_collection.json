@@ -1,0 +1,709 @@
+{
+  "info": {
+    "name": "Restoku API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection untuk testing Restoku API v1."
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "idempotency_key",
+      "value": "idem-001"
+    },
+    {
+      "key": "menu_id",
+      "value": "1"
+    },
+    {
+      "key": "category_id",
+      "value": "1"
+    },
+    {
+      "key": "table_id",
+      "value": "1"
+    },
+    {
+      "key": "order_id",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"User Demo\",\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/verify-otp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-otp"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "List Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories?per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Course\",\n  \"description\": \"Kategori utama\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Main Course Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/{{category_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories",
+                "{{category_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categories/{{category_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "categories",
+                "{{category_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menus",
+      "item": [
+        {
+          "name": "List Menus",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/menus?per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "menus"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Menu",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category_id\": {{category_id}},\n  \"name\": \"Nasi Goreng\",\n  \"price\": 25000,\n  \"description\": \"Menu spesial\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/menus",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "menus"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Upload Menu Image",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/menus/{{menu_id}}/image",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "menus",
+                "{{menu_id}}",
+                "image"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Menu",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nasi Goreng Spesial\",\n  \"price\": 30000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/menus/{{menu_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "menus",
+                "{{menu_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Menu",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/menus/{{menu_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "menus",
+                "{{menu_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tables",
+      "item": [
+        {
+          "name": "List Tables",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/tables?per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tables"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Table A1\",\n  \"status\": \"available\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/tables",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tables"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Table",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"occupied\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/tables/{{table_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tables",
+                "{{table_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Table",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/tables/{{table_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "tables",
+                "{{table_id}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders?per_page=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{idempotency_key}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"restaurant_table_id\": {{table_id}},\n  \"items\": [\n    {\n      \"menu_id\": {{menu_id}},\n      \"quantity\": 2\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Order Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders/{{order_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{order_id}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"processing\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/orders/{{order_id}}/status",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "{{order_id}}",
+                "status"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "SSE Stream",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/stream",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "stream"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
