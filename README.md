@@ -1,21 +1,21 @@
 # Restoku API
 
-Laravel API for Restoku (Restaurant Order Management).
+Laravel API untuk Restoku (Restaurant Order Management).
 
-## Requirements
+## Kebutuhan Sistem
 - PHP 8.1+
 - Composer
 - PostgreSQL
-- Mail SMTP (for OTP)
-- S3-compatible storage (MinIO/R2/S3) for menu images
+- Mail SMTP (untuk OTP)
+- Object storage kompatibel S3 (MinIO/R2/S3) untuk gambar menu
 
-## Setup
-1) Copy env file:
+## Cara Menjalankan Aplikasi
+1) Salin env:
 ```
 cp .env.example .env
 ```
-2) Configure database, mail, and storage settings in `.env`.
-3) Install dependencies:
+2) Konfigurasikan database, mail, dan storage di `.env`.
+3) Install dependensi:
 ```
 composer install
 ```
@@ -23,17 +23,21 @@ composer install
 ```
 php artisan key:generate
 ```
-5) Run migrations and seed default admin:
+5) Jalankan migrasi dan seed admin:
 ```
 php artisan migrate --seed
 ```
+6) Jalankan server:
+```
+php artisan serve
+```
 
-Default admin user:
+Default admin:
 - email: `admin@restoku.test`
 - password: `password`
 
 ## Database (PostgreSQL)
-Example `.env` values:
+Contoh `.env`:
 ```
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
@@ -44,7 +48,7 @@ DB_PASSWORD=secret
 ```
 
 ## Object Storage (MinIO / S3)
-Example MinIO config in `.env`:
+Contoh konfigurasi MinIO di `.env`:
 ```
 FILESYSTEM_DISK=s3
 AWS_ACCESS_KEY_ID=minioadmin
@@ -55,31 +59,39 @@ AWS_ENDPOINT=http://127.0.0.1:9000
 AWS_USE_PATH_STYLE_ENDPOINT=true
 ```
 
-Create bucket:
+Buat bucket:
 ```
 mc alias set local http://127.0.0.1:9000 minioadmin minioadmin
 mc mb local/restoku
 ```
 
-## Pricing Configuration
-Optional service charge and tax:
+## Konfigurasi Harga
+Service charge dan pajak (opsional):
 ```
 RESTOKU_SERVICE_CHARGE_PERCENT=0
 RESTOKU_TAX_PERCENT=0
 ```
 
-## Auth Flow (OTP)
+## Alur Auth (OTP)
 - Register: `POST /api/v1/auth/register`
 - Login: `POST /api/v1/auth/login`
 - Verify OTP: `POST /api/v1/auth/verify-otp`
 - Logout: `POST /api/v1/auth/logout`
 
-Rate limits:
+Rate limit:
 - register/login: 5/min
 - verify-otp: 10/min
 
-## Core Endpoints
-All endpoints below require `Authorization: Bearer <token>`.
+## Fitur Utama
+- Manajemen kategori, menu, meja, dan pesanan.
+- Idempotent order via header `Idempotency-Key`.
+- Status order: `pending -> processing -> done`.
+- Upload gambar menu ke storage S3-compatible.
+- Streaming update order/notification via SSE.
+- Role staff untuk aksi administratif.
+
+## Endpoint Utama
+Semua endpoint di bawah perlu `Authorization: Bearer <token>`.
 
 Customer + Admin:
 - `GET /api/v1/categories`
@@ -104,8 +116,28 @@ Admin/Staff only:
 - `PATCH /api/v1/orders/{order}/assign`
 - `PATCH /api/v1/orders/{order}/status`
 
-## Notes
-- Order creation is idempotent via `Idempotency-Key` header.
-- Order status transitions: `pending -> processing -> done`.
-- Menu image URL is returned as `image_url`.
-- Orders support `note` and item-level `notes`.
+## Paket Penting dan Dampaknya
+Runtime (production):
+- `laravel/framework`: inti aplikasi; performa dipengaruhi oleh config cache dan route cache.
+- `laravel/sanctum`: auth token; aman untuk API, perlu proteksi token dan HTTPS.
+- `league/flysystem-aws-s3-v3`: akses storage S3; latency tergantung jaringan dan bucket.
+- `guzzlehttp/guzzle`: HTTP client; bisa menambah latency bila dipakai sync di request.
+- `laravel/tinker`: console interaktif; nonaktifkan di produksi untuk mengurangi risiko akses tidak perlu.
+
+Dev/Test:
+- `phpunit/phpunit`: test suite; tidak berdampak ke runtime.
+- `mockery/mockery`: mocking; hanya saat test.
+- `fakerphp/faker`: data dummy; hanya saat test/seed.
+- `laravel/pint`: formatter; tidak berdampak ke runtime.
+- `nunomaduro/collision`: output error di dev; tidak untuk production.
+- `spatie/laravel-ignition`: debug page; pastikan `APP_DEBUG=false` di production.
+- `laravel/sail`: dev Docker; tidak dipakai di runtime.
+
+## Catatan
+- URL gambar menu dikembalikan sebagai `image_url`.
+- Order mendukung `note` dan item-level `notes`.
+
+## Highlight Security & Performa
+- Security: `laravel/sanctum` untuk token auth, rate limiting pada auth endpoint, validasi request di FormRequest, policy/role `staff`, SSE hanya untuk user terautentikasi.
+- Performa: idempotency untuk mencegah order duplikat, index DB pada field lookup, pagination + polling, cache untuk nomor antrian, storage S3 untuk offload file statik.
+- Alasan SSE: kebutuhan update bersifat satu arah (server -> client), lebih sederhana dari WebSocket, kompatibel dengan HTTP/proxy umum, dan lebih mudah dioperasikan tanpa infrastruktur socket khusus.
